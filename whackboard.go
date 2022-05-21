@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 type CellType rune
 
 const (
@@ -8,7 +10,7 @@ const (
 	Ice CellType = '🧊'
 	Whack CellType = '🎯'
 	width int = 32
-	height int =15
+	height int = 15
 )
 
 type Board struct {
@@ -25,9 +27,14 @@ func NewBoard() *Board {
 			board[i][j] = Empty
 		}
 	}
-	return &Board{
+
+	b := &Board{
 		board: board,
 	}
+
+	b.Generate()
+
+	return b
 }
 
 func (b *Board) RenderBoard() string {
@@ -39,4 +46,19 @@ func (b *Board) RenderBoard() string {
 		s += "\n"
 	}
 	return s
+}
+
+func (b *Board) Generate() {
+	b.whackX = rand.Intn(width)
+	b.whackY = rand.Intn(height)
+
+	for i := range b.board {
+		for j := range b.board[i] {
+			if i == b.whackY && j == b.whackX {
+				b.board[i][j] = Whack
+			} else {
+				b.board[i][j] = Empty
+			}
+		}
+	}
 }
