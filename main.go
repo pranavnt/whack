@@ -60,42 +60,34 @@ func main() {
 // Make sure you set the program input and output to ssh.Session.
 func myCustomBubbleteaMiddleware() wish.Middleware {
 	newProg := func(m tea.Model, opts ...tea.ProgramOption) *tea.Program {
-		p := tea.NewProgram(m, opts...)
-		go func() {
-			for {
-				<-time.After(1 * time.Second)
-				p.Send(timeMsg(time.Now()))
-			}
-		}()
-		return p
+		return tea.NewProgram(m, opts...)
 	}
 	teaHandler := func(s ssh.Session) *tea.Program {
-		pty, _, active := s.Pty()
-		if !active {
-			fmt.Println("no active terminal, skipping")
-			_ = s.Exit(1)
-			return nil
-		}
+		//pty, _, active := s.Pty()
+		//if !active {
+		//	fmt.Println("no active terminal, skipping")
+		//	_ = s.Exit(1)
+		//	return nil
+		//}
 		m := model{
-			term:   pty.Term,
-			width:  pty.Window.Width,
-			height: pty.Window.Height,
-			time:   time.Now(),
+			//term:   pty.Term,
+			//width:  pty.Window.Width,
+			//height: pty.Window.Height,
 		}
-		return newProg(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen())
+		return newProg(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
 	}
 	return bm.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
 }
 
 // Just a generic tea.Model to demo terminal information of ssh.
 type model struct {
-	term   string
-	width  int
-	height int
-	time   time.Time
-}
+	//term   string
+	//width  int
+	//height int
 
-type timeMsg time.Time
+	x int
+	y int
+}
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -103,24 +95,27 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case timeMsg:
-		m.time = time.Time(msg)
-	case tea.WindowSizeMsg:
-		m.height = msg.Height
-		m.width = msg.Width
+	//case tea.WindowSizeMsg:
+	//	m.height = msg.Height
+	//	m.width = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
+	case tea.MouseMsg:
+		if msg.Type != tea.MouseRelease { // trigger on release only - no dragging allowed
+			return m, nil
+		}
+		m.x = msg.X
+		m.y = msg.Y
+		fmt.Println("mouse", msg.X, msg.Y)
 	}
 	return m, nil
 }
 
 func (m model) View() string {
-	s := "Your term is %s\n"
-	s += "Your window size is x: %d y: %d\n"
-	s += "Time: " + m.time.Format(time.RFC1123) + "\n\n"
+	s := "you clicked on x: %d y: %d\n"
 	s += "Press 'q' to quit\n"
-	return fmt.Sprintf(s, m.term, m.width, m.height)
+	return fmt.Sprintf(s, m.x, m.y)
 }
