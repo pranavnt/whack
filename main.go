@@ -25,6 +25,8 @@ const (
 	port = 23234
 )
 
+var b = NewBoard()
+
 func main() {
 	s, err := wish.NewServer(
 		wish.WithAddress(fmt.Sprintf("%s:%d", host, port)),
@@ -114,6 +116,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
+
 	return m, nil
 }
 
@@ -122,5 +125,6 @@ func (m model) View() string {
 	s += "Your window size is x: %d y: %d\n"
 	s += "Time: " + m.time.Format(time.RFC1123) + "\n\n"
 	s += "Press 'q' to quit\n"
+	s += b.RenderBoard()
 	return fmt.Sprintf(s, m.term, m.width, m.height)
 }
