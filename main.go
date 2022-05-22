@@ -45,7 +45,7 @@ var (
 
 //var programs = make(map[*tea.Program]int, 100)
 
-var programs = make([]*tea.Program, 0, 100)
+var models = make([]*model, 0, 100)
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -79,6 +79,8 @@ func main() {
 	}
 }
 
+var programsTillNow = make([]*tea.Program, 0, 100)
+
 //var currID int
 
 // You can write your own custom bubbletea middleware that wraps tea.Program.
@@ -92,17 +94,30 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 		//	return nil
 		//}
 		//currID++
+		jah := make([]*tea.Program, 0, len(programsTillNow))
+		copy(jah, programsTillNow)
 		m := &model{
 			team: rand.Float64() > 0.5,
+			others: jah,
 			//modelID: currID,
 			//term:   pty.Term,
 			//width:  pty.Window.Width,
 			//height: pty.Window.Height,
 		}
-		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
-		m.thisProgram = p
 
-		programs = append(programs, p)
+
+		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseAllMotion())
+		
+		for _, mod := range models {
+			mod.others = append(mod.others, p)
+		}
+
+		models = append(models, m)
+
+		programsTillNow = append(programsTillNow, p)
+		// m.thisProgram = p
+
+		// programs = append(programs, p)
 		return p
 	}
 	return bm.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
@@ -115,7 +130,8 @@ type model struct {
 	//height int
 	team bool // true means fire
 	//modelID int
-	thisProgram *tea.Program
+	// thisProgram *tea.Program
+	others []*tea.Program
 	x           int
 	y           int
 
@@ -129,7 +145,7 @@ func (m model) Init() tea.Cmd {
 var lock = new(sync.Mutex)
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	fmt.Println(fmt.Sprintf("%p", m.thisProgram), msg)
+	// fmt.Println(fmt.Sprintf("%p", m.thisProgram), msg)
 	switch msg := msg.(type) {
 	//case tea.WindowSizeMsg:
 	//	m.height = msg.Height
@@ -137,12 +153,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
-			for i, p := range programs {
-				if p == m.thisProgram {
-					programs = append(programs[:i], programs[i+1:]...)
-					break
-				}
-			}
+			// for i, p := range programs {
+			// 	if p == m.thisProgram {
+			// 		programs = append(programs[:i], programs[i+1:]...)
+			// 		break
+			// 	}
+			// }
 			//fmt.Println(m.thisProgram, "quitting")
 			return m, tea.Quit
 		}
@@ -158,16 +174,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		
 		lock.Lock()
 		
-		for _, p := range programs {
+		for _, p := range m.others {
 			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
 			pstr := fmt.Sprintf("%p", p)
-			thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
+			// thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
 
-			fmt.Println(pstr, thisProgramStr)
+			// fmt.Println(pstr, thisProgramStr)
 
-			if p == m.thisProgram {
-				continue
-			}
+			// if p == m.thisProgram {
+			// 	continue
+			// }
 			fmt.Println("rendering " + pstr)
 			p.Send(tea.Msg(true)) // trigger render
 			fmt.Println("rendered " + pstr)
