@@ -25,6 +25,14 @@ import (
 const (
 	host = ""
 	port = 23234
+
+	rules = `Rules:
+
+   • Clicking a target wins a point for your team
+
+   • Clicking the other team's emoji loses a point and makes water
+
+   • Clicking on water takes away a point`
 )
 
 var (
@@ -172,5 +180,5 @@ func (m model) View() string {
 	}
 	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" +
 		"Press 'q' to quit\n" +
-		b.RenderBoard(t, fireScore, iceScore, m.comment) + "\n"
+		b.RenderBoard(t, fireScore, iceScore, m.comment) + "\n" + rules
 }
