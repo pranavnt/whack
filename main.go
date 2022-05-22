@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,13 +22,16 @@ import (
 )
 
 const (
-	host = "localhost"
+	host = ""
 	port = 23234
 )
 
 var b = NewBoard()
 
+var programs = make([]*tea.Program, 0, 100)
+
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	s, err := wish.NewServer(
 		wish.WithAddress(fmt.Sprintf("%s:%d", host, port)),
 		wish.WithHostKeyPath(".ssh/term_info_ed25519"),
@@ -71,12 +75,15 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 		//	_ = s.Exit(1)
 		//	return nil
 		//}
-		m := model{
+		m := &model{
 			//term:   pty.Term,
 			//width:  pty.Window.Width,
 			//height: pty.Window.Height,
 		}
-		return newProg(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
+		p := newProg(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
+		m.thisProgram = p
+		programs = append(programs, p)
+		return p
 	}
 	return bm.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
 }
@@ -86,9 +93,9 @@ type model struct {
 	//term   string
 	//width  int
 	//height int
-
-	x int
-	y int
+	thisProgram *tea.Program
+	x           int
+	y           int
 }
 
 func (m model) Init() tea.Cmd {
@@ -109,9 +116,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Type != tea.MouseRelease { // trigger on release only - no dragging allowed
 			return m, nil
 		}
-		m.x = msg.X
-		m.y = msg.Y
-		fmt.Println("mouse", msg.X, msg.Y)
+		m.x = msg.X / 2 // divide by 2: each emoji is two cells wide
+		m.y = msg.Y - 2 // subtract 2: the top two rows are not part of the board
+		fmt.Println("mouse", m.x, m.y)
+
+		b.Click(m.x, m.y)
+		for _, p := range programs {
+			//fmt.Printf("%p %p\n", p, programs)
+			if p == m.thisProgram {
+				continue
+			}
+			//fmt.Println("rendering")
+			p.Send(tea.Msg(true)) // trigger render
+			//fmt.Println("rendered")
+		}
 	}
 
 	return m, nil

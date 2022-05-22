@@ -53,7 +53,6 @@ func (b *Board) RenderBoard() string {
 func (b *Board) Seed() {
 	b.whackX = rand.Intn(width)
 	b.whackY = rand.Intn(height)
-
 	for i := range b.board {
 		for j := range b.board[i] {
 			if i == b.whackY && j == b.whackX {
