@@ -53,22 +53,21 @@ func (b *Board) RenderBoard() string {
 func (b *Board) Generate() {
 	b.whackX = rand.Intn(width)
 	b.whackY = rand.Intn(height)
-	for i := range b.board {
-		for j := range b.board[i] {
-			b.board[i][j] = Empty
-		}
-	}
 	b.board[b.whackY][b.whackX] = Whack
 }
 
-func (b *Board) Click(x, y int) {
+func (b *Board) Click(x, y int, team bool) {
 
 	if x > width || y > height {
 		return
 	}
 
 	if b.board[y][x] == Whack {
-		b.board[y][x] = Empty
+		if team {
+			b.board[y][x] = Fire
+		} else {
+			b.board[y][x] = Ice
+		}
 		b.Generate()
 	}
 }
