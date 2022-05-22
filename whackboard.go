@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-type CellType string 
+type CellType string
 
 const (
-	Tree  CellType = "🌳"
-	TreeHot CellType = "🌴"
+	Tree     CellType = "🌳"
+	TreeHot  CellType = "🌴"
 	TreeCold CellType = "🌲"
-	Fire   CellType = "🔥"
-	Ice    CellType = "🧊"
-	Whack  CellType = "🎯"
-	Water  CellType = "️💧"
-	width  int      = 32
-	height int      = 15
+	Fire     CellType = "🔥"
+	Ice      CellType = "🧊"
+	Whack    CellType = "🎯"
+	Water    CellType = "️💧"
+	width    int      = 32
+	height   int      = 15
 )
 
 type Board struct {
@@ -82,17 +82,21 @@ func (b *Board) Click(x, y int, team bool) {
 	if b.board[y][x] == Whack {
 		if team {
 			b.board[y][x] = Fire
+			fireScore++
 		} else {
 			b.board[y][x] = Ice
+			iceScore++
 		}
 		b.Generate()
 	} else if b.board[y][x] == Fire {
 		if !team {
 			b.board[y][x] = Water
+			iceScore--
 		}
 	} else if b.board[y][x] == Ice {
 		if team {
-			b.board[y][x] = Water 
+			b.board[y][x] = Water
+			fireScore--
 		}
 	} else if b.board[y][x] == Tree {
 		if team {
@@ -101,6 +105,11 @@ func (b *Board) Click(x, y int, team bool) {
 			b.board[y][x] = TreeCold
 		}
 	} else if b.board[y][x] == Water {
+		if team {
+			fireScore--
+		} else {
+			iceScore--
+		}
 		// b.board[y][x] = Tree
 	}
 }

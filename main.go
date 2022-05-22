@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -161,5 +162,5 @@ func (m model) View() string {
 	} else {
 		t = "🧊"
 	}
-	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" + "Press 'q' to quit\n" + b.RenderBoard()
+	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" + "Press 'q' to quit\n" + b.RenderBoard() + "\n🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
 }
