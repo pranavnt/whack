@@ -26,9 +26,16 @@ const (
 	port = 23234
 )
 
-var b = NewBoard()
+var (
+	b = NewBoard()
 
-var programs = make(map[*tea.Program]int, 100)
+	fireScore = 0
+	iceScore  = 0
+)
+
+//var programs = make(map[*tea.Program]int, 100)
+
+var programs = make([]*tea.Program, 0, 100)
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -62,14 +69,11 @@ func main() {
 	}
 }
 
-var currID int
+//var currID int
 
 // You can write your own custom bubbletea middleware that wraps tea.Program.
 // Make sure you set the program input and output to ssh.Session.
 func myCustomBubbleteaMiddleware() wish.Middleware {
-	newProg := func(m tea.Model, opts ...tea.ProgramOption) *tea.Program {
-		return tea.NewProgram(m, opts...)
-	}
 	teaHandler := func(s ssh.Session) *tea.Program {
 		//pty, _, active := s.Pty()
 		//if !active {
@@ -77,16 +81,18 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 		//	_ = s.Exit(1)
 		//	return nil
 		//}
-		currID++
+		//currID++
 		m := &model{
-			team:    rand.Float64() > 0.5,
-			modelID: currID,
+			team: rand.Float64() > 0.5,
+			//modelID: currID,
 			//term:   pty.Term,
 			//width:  pty.Window.Width,
 			//height: pty.Window.Height,
 		}
-		p := newProg(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
-		programs[p] = m.modelID
+		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseCellMotion())
+		m.thisProgram = p
+
+		programs = append(programs, p)
 		return p
 	}
 	return bm.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
@@ -97,10 +103,11 @@ type model struct {
 	//term   string
 	//width  int
 	//height int
-	team    bool // true means fire
-	modelID int
-	x       int
-	y       int
+	team bool // true means fire
+	//modelID int
+	thisProgram *tea.Program
+	x           int
+	y           int
 }
 
 func (m model) Init() tea.Cmd {
@@ -115,6 +122,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
+			for i, p := range programs {
+				if p == m.thisProgram {
+					programs = append(programs[:i], programs[i+1:]...)
+					break
+				}
+			}
+			//fmt.Println(m.thisProgram, "quitting")
 			return m, tea.Quit
 		}
 	case tea.MouseMsg:
@@ -126,14 +140,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		//fmt.Println("mouse", m.x, m.y)
 
 		b.Click(m.x, m.y, m.team)
-		for p, id := range programs {
-			fmt.Printf("%d %d\n", id, m.modelID)
-			if id == m.modelID {
+		for _, p := range programs {
+			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
+			if p == m.thisProgram {
 				continue
 			}
-			fmt.Println("rendering")
+			//fmt.Println("rendering", p)
 			p.Send(tea.Msg(true)) // trigger render
-			fmt.Println("rendered")
+			//fmt.Println("rendered", p)
 		}
 	}
 
@@ -147,8 +161,5 @@ func (m model) View() string {
 	} else {
 		t = "🧊"
 	}
-	s := "You're in the %s team! Click on targets to win %ss for your team!\n"
-	s += "Press 'q' to quit\n"
-	s += b.RenderBoard()
-	return fmt.Sprintf(s, t, t)
+	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" + "Press 'q' to quit\n" + b.RenderBoard()
 }
