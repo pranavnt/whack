@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -51,9 +52,24 @@ func NewBoard() *Board {
 	return b
 }
 
-func (b *Board) RenderBoard() string {
+func intTo3DigStr(i int) string {
+	if i <= -10 {
+		return strconv.Itoa(i)
+	} else if i < 0 {
+		return strconv.Itoa(i) + "─"
+	} else if i < 10 {
+		return strconv.Itoa(i) + "──"
+	} else if i < 100 {
+		return strconv.Itoa(i) + "─"
+	} else {
+		return strconv.Itoa(i)
+	}
+}
+
+func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) string {
 	var s string
-	s += "╭" + strings.Repeat("─", width*2) + "╮" + "\n"
+
+	s += "╭" + strings.Repeat("─", 4) + t + t + t + strings.Repeat("─", (width-13)*2) + "🔥 " + intTo3DigStr(fireScore) + "──" + "🧊 " + intTo3DigStr(iceScore) + "──" + "╮" + "\n"
 
 	for _, row := range b.board {
 		s += "│"
@@ -65,6 +81,8 @@ func (b *Board) RenderBoard() string {
 
 	s += "╰" + strings.Repeat("─", width*2) + "╯" + "\n"
 
+	s += comment
+
 	return s
 }
 
@@ -75,7 +93,7 @@ func (b *Board) Generate() {
 }
 
 func (b *Board) Click(x, y int, team bool) {
-	if x > width || y > height {
+	if x > width || y > height || x < 0 || y < 0 {
 		return
 	}
 
