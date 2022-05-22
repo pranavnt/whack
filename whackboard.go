@@ -26,7 +26,15 @@ func NewBoard() *Board {
 	for i := range board {
 		board[i] = make([]CellType, width)
 		for j := range board[i] {
-			board[i][j] = Empty
+			r int = rand.Intn(20)
+
+			if r==0 {
+				board[i][j] = Fire
+			} else if r==1 {
+				board[i][j] = Ice 
+			} else {
+				board[i][j] = Empty
+			}
 		}
 	}
 
