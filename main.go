@@ -126,6 +126,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	fmt.Println(fmt.Sprintf("%p", m.thisProgram), msg)
 	switch msg := msg.(type) {
 	//case tea.WindowSizeMsg:
 	//	m.height = msg.Height
@@ -153,12 +154,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.comment = b.Click(m.x, m.y, m.team)
 		for _, p := range programs {
 			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
+			pstr := fmt.Sprintf("%p", p)
+			thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
+
+			fmt.Println(pstr, thisProgramStr)
+
 			if p == m.thisProgram {
 				continue
 			}
-			//fmt.Println("rendering", p)
+			fmt.Println("rendering " + pstr)
 			p.Send(tea.Msg(true)) // trigger render
-			//fmt.Println("rendered", p)
+			fmt.Println("rendered " + pstr)
 		}
 	}
 
