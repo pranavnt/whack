@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"strings"
 )
 
 type CellType string 
@@ -52,12 +53,18 @@ func NewBoard() *Board {
 
 func (b *Board) RenderBoard() string {
 	var s string
+	s += "╭" + strings.Repeat("─", width*2) + "╮" + "\n"
+
 	for _, row := range b.board {
+		s += "│"
 		for _, cell := range row {
 			s += string(cell)
 		}
-		s += "\n"
+		s += "│\n"
 	}
+
+	s += "╰" + strings.Repeat("─", width*2) + "╯" + "\n"
+
 	return s
 }
 

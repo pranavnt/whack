@@ -135,8 +135,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Type != tea.MouseRelease { // trigger on release only - no dragging allowed
 			return m, nil
 		}
-		m.x = msg.X / 2 // divide by 2: each emoji is two cells wide
-		m.y = msg.Y - 2 // subtract 2: the top two rows are not part of the board
+		m.x = (msg.X-1) / 2  // divide by 2: each emoji is two cells wide
+		m.y = msg.Y - 3 // subtract 2: the top two rows are not part of the board
 		//fmt.Println("mouse", m.x, m.y)
 
 		b.Click(m.x, m.y, m.team)
