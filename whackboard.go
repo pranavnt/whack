@@ -106,7 +106,7 @@ func (b *Board) Generate() {
 }
 
 func (b *Board) Click(x, y int, team bool) string {
-	if x > width || y > height || x < 0 || y < 0 {
+	if x >= width || y >= height || x < 0 || y < 0 {
 		return "Out of bounds!"
 	}
 

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -125,6 +126,8 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+var lock = new(sync.Mutex)
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	fmt.Println(fmt.Sprintf("%p", m.thisProgram), msg)
 	switch msg := msg.(type) {
@@ -152,6 +155,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		//fmt.Println("mouse", m.x, m.y)
 
 		m.comment = b.Click(m.x, m.y, m.team)
+		
+		lock.Lock()
+		
 		for _, p := range programs {
 			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
 			pstr := fmt.Sprintf("%p", p)
@@ -166,6 +172,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.Send(tea.Msg(true)) // trigger render
 			fmt.Println("rendered " + pstr)
 		}
+
+		lock.Unlock()
 	}
 
 	return m, nil
