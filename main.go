@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -45,7 +44,7 @@ var (
 
 //var programs = make(map[*tea.Program]int, 100)
 
-var models = make([]*model, 0, 100)
+//var models = make([]*model, 0, 100)
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -79,7 +78,7 @@ func main() {
 	}
 }
 
-var programsTillNow = make([]*tea.Program, 0, 100)
+//var programsTillNow = make([]*tea.Program, 0, 100)
 
 //var currID int
 
@@ -94,27 +93,26 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 		//	return nil
 		//}
 		//currID++
-		jah := make([]*tea.Program, 0, len(programsTillNow))
-		copy(jah, programsTillNow)
+		//jah := make([]*tea.Program, 0, len(programsTillNow))
+		//copy(jah, programsTillNow)
 		m := &model{
 			team: rand.Float64() > 0.5,
-			others: jah,
+			//others: jah,
 			//modelID: currID,
-			//term:   pty.Term,
+			//term:   pty.Term,Ω
 			//width:  pty.Window.Width,
 			//height: pty.Window.Height,
 		}
 
-
 		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseAllMotion())
-		
-		for _, mod := range models {
-			mod.others = append(mod.others, p)
-		}
 
-		models = append(models, m)
-
-		programsTillNow = append(programsTillNow, p)
+		//for _, mod := range models {
+		//	mod.others = append(mod.others, p)
+		//}
+		//
+		//models = append(models, m)
+		//
+		//programsTillNow = append(programsTillNow, p)
 		// m.thisProgram = p
 
 		// programs = append(programs, p)
@@ -132,8 +130,8 @@ type model struct {
 	//modelID int
 	// thisProgram *tea.Program
 	others []*tea.Program
-	x           int
-	y           int
+	x      int
+	y      int
 
 	comment string
 }
@@ -142,7 +140,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-var lock = new(sync.Mutex)
+//var lock = new(sync.Mutex)
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// fmt.Println(fmt.Sprintf("%p", m.thisProgram), msg)
@@ -171,25 +169,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		//fmt.Println("mouse", m.x, m.y)
 
 		m.comment = b.Click(m.x, m.y, m.team)
-		
-		lock.Lock()
-		
-		for _, p := range m.others {
-			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
-			pstr := fmt.Sprintf("%p", p)
-			// thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
 
-			// fmt.Println(pstr, thisProgramStr)
+		//lock.Lock()
 
-			// if p == m.thisProgram {
-			// 	continue
-			// }
-			fmt.Println("rendering " + pstr)
-			p.Send(tea.Msg(true)) // trigger render
-			fmt.Println("rendered " + pstr)
-		}
+		//for _, p := range m.others {
+		//	//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
+		//	pstr := fmt.Sprintf("%p", p)
+		//	// thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
+		//
+		//	// fmt.Println(pstr, thisProgramStr)
+		//
+		//	// if p == m.thisProgram {
+		//	// 	continue
+		//	// }
+		//	fmt.Println("rendering " + pstr)
+		//	p.Send(tea.Msg(true)) // trigger render
+		//	fmt.Println("rendered " + pstr)
+		//}
 
-		lock.Unlock()
+		//lock.Unlock()
 	}
 
 	return m, nil
