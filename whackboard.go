@@ -4,13 +4,16 @@ import (
 	"math/rand"
 )
 
-type CellType rune
+type CellType string 
 
 const (
-	Empty  CellType = '🌲'
-	Fire   CellType = '🔥'
-	Ice    CellType = '🧊'
-	Whack  CellType = '🎯'
+	Tree  CellType = "🌳"
+	TreeHot CellType = "🌴"
+	TreeCold CellType = "🌲"
+	Fire   CellType = "🔥"
+	Ice    CellType = "🧊"
+	Whack  CellType = "🎯"
+	Steam  CellType = "️☁️"
 	width  int      = 32
 	height int      = 15
 )
@@ -26,14 +29,14 @@ func NewBoard() *Board {
 	for i := range board {
 		board[i] = make([]CellType, width)
 		for j := range board[i] {
-			r := rand.Intn(20)
+			r := rand.Intn(40)
 
-			if r==0 {
+			if r == 0 {
 				board[i][j] = Fire
-			} else if r==1 {
-				board[i][j] = Ice 
+			} else if r == 1 {
+				board[i][j] = Ice
 			} else {
-				board[i][j] = Empty
+				board[i][j] = Tree
 			}
 		}
 	}
@@ -65,7 +68,6 @@ func (b *Board) Generate() {
 }
 
 func (b *Board) Click(x, y int, team bool) {
-
 	if x > width || y > height {
 		return
 	}
@@ -77,5 +79,21 @@ func (b *Board) Click(x, y int, team bool) {
 			b.board[y][x] = Ice
 		}
 		b.Generate()
+	} else if b.board[y][x] == Fire {
+		if !team {
+			b.board[y][x] = Steam
+		}
+	} else if b.board[y][x] == Ice {
+		if team {
+			b.board[y][x] = Steam
+		}
+	} else if b.board[y][x] == Tree {
+		if team {
+			b.board[y][x] = TreeHot
+		} else {
+			b.board[y][x] = TreeCold
+		}
+	} else if b.board[y][x] == Steam {
+		// b.board[y][x] = Tree
 	}
 }
