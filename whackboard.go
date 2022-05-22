@@ -1,20 +1,22 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 type CellType rune
 
 const (
-	Empty CellType = '🌲'
-	Fire CellType = '🔥'
-	Ice CellType = '🧊'
-	Whack CellType = '🎯'
-	width int = 32
-	height int = 15
+	Empty  CellType = '🌲'
+	Fire   CellType = '🔥'
+	Ice    CellType = '🧊'
+	Whack  CellType = '🎯'
+	width  int      = 32
+	height int      = 15
 )
 
 type Board struct {
-	board [][]CellType
+	board  [][]CellType
 	whackX int
 	whackY int
 }
@@ -32,7 +34,7 @@ func NewBoard() *Board {
 		board: board,
 	}
 
-	b.Generate()
+	b.Seed()
 
 	return b
 }
@@ -48,7 +50,7 @@ func (b *Board) RenderBoard() string {
 	return s
 }
 
-func (b *Board) Generate() {
+func (b *Board) Seed() {
 	b.whackX = rand.Intn(width)
 	b.whackY = rand.Intn(height)
 
@@ -57,7 +59,15 @@ func (b *Board) Generate() {
 			if i == b.whackY && j == b.whackX {
 				b.board[i][j] = Whack
 			} else {
-				b.board[i][j] = Empty
+				r := rand.Intn(20)
+				// 5% chance of fire, 5% chance of ice
+				if r == 0 {
+					b.board[i][j] = Fire
+				} else if r == 1 {
+					b.board[i][j] = Ice
+				} else {
+					b.board[i][j] = Empty
+				}
 			}
 		}
 	}
