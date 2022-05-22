@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -156,7 +157,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+var gameDoneMsg = ""
+
 func (m model) View() string {
+	if len(gameDoneMsg) > 0 {
+		l := len([]rune(gameDoneMsg))
+		return strings.Repeat("\n", height/2) + strings.Repeat(" ", width) + "Game over!\n" + strings.Repeat(" ", width-l/2) + gameDoneMsg + strings.Repeat(" ", width-l/2)
+	}
 	t := ""
 	if m.team {
 		t = "🔥"

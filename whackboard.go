@@ -31,11 +31,11 @@ func NewBoard() *Board {
 	for i := range board {
 		board[i] = make([]CellType, width)
 		for j := range board[i] {
-			r := rand.Intn(40)
+			r := rand.Float64()
 
-			if r == 0 {
+			if r < 0.02 {
 				board[i][j] = Fire
-			} else if r == 1 {
+			} else if r < 0.04 {
 				board[i][j] = Ice
 			} else {
 				board[i][j] = Tree
@@ -98,7 +98,11 @@ func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) s
 func (b *Board) Generate() {
 	b.whackX = rand.Intn(width)
 	b.whackY = rand.Intn(height)
-	b.board[b.whackY][b.whackX] = Whack
+	if b.board[b.whackY][b.whackX] == Tree || b.board[b.whackY][b.whackX] == TreeHot || b.board[b.whackY][b.whackX] == TreeCold {
+		b.board[b.whackY][b.whackX] = Whack
+		return
+	}
+	b.Generate()
 }
 
 func (b *Board) Click(x, y int, team bool) string {
@@ -147,5 +151,28 @@ func (b *Board) Click(x, y int, team bool) string {
 		}
 		// b.board[y][x] = Tree
 	}
+
+out:
+	for r, row := range b.board {
+		for c, cell := range row {
+			if cell == TreeHot || cell == TreeCold || cell == Tree {
+				break out
+			}
+
+			if r == len(b.board)-1 && c == len(row)-1 {
+				s := "The game has ended! "
+				if fireScore > iceScore {
+					s += "🔥 wins!"
+				} else if iceScore > fireScore {
+					s += "🧊 wins!"
+				} else {
+					s += "It's a tie!"
+				}
+				gameDoneMsg = s
+				return ""
+			}
+		}
+	}
+
 	return comment
 }
