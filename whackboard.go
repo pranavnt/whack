@@ -16,7 +16,7 @@ const (
 	Ice      CellType = "🧊"
 	Whack    CellType = "🎯"
 	Water    CellType = "️💧"
-	width    int      = 32
+	width    int      = 15
 	height   int      = 15
 )
 
@@ -127,20 +127,21 @@ func (b *Board) Click(x, y int, team bool) string {
 			b.board[y][x] = Water
 			iceScore--
 		}
-		comment = "Ouch! Ice and fire make water!"
+		comment = "Ouch! You made water!"
 	} else if b.board[y][x] == Ice {
 		if team {
 			b.board[y][x] = Water
 			fireScore--
 		}
-		comment = "Ouch! Ice and fire make water!"
+		comment = "Ouch! You made water!"
 	} else if b.board[y][x] == Tree {
 		if team {
 			b.board[y][x] = TreeHot
+			comment = "Palm tree!"
 		} else {
 			b.board[y][x] = TreeCold
+			comment = "Pine tree!"
 		}
-		comment = "The tree's on your side now!"
 	} else if b.board[y][x] == Water {
 		if team {
 			fireScore--
@@ -160,7 +161,7 @@ out:
 			}
 
 			if r == len(b.board)-1 && c == len(row)-1 {
-				s := "The game has ended! "
+				s := ""
 				if fireScore > iceScore {
 					s += "🔥 wins!"
 				} else if iceScore > fireScore {
