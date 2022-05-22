@@ -26,7 +26,7 @@ func NewBoard() *Board {
 	for i := range board {
 		board[i] = make([]CellType, width)
 		for j := range board[i] {
-			r int = rand.Intn(20)
+			r := rand.Intn(20)
 
 			if r==0 {
 				board[i][j] = Fire
