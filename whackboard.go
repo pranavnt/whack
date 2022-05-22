@@ -92,10 +92,12 @@ func (b *Board) Generate() {
 	b.board[b.whackY][b.whackX] = Whack
 }
 
-func (b *Board) Click(x, y int, team bool) {
+func (b *Board) Click(x, y int, team bool) string {
 	if x > width || y > height || x < 0 || y < 0 {
-		return
+		return "Out of bounds!"
 	}
+
+	comment := ""
 
 	if b.board[y][x] == Whack {
 		if team {
@@ -105,29 +107,36 @@ func (b *Board) Click(x, y int, team bool) {
 			b.board[y][x] = Ice
 			iceScore++
 		}
+		comment = "Nice!"
 		b.Generate()
 	} else if b.board[y][x] == Fire {
 		if !team {
 			b.board[y][x] = Water
 			iceScore--
 		}
+		comment = "Ouch! Ice and fire make water!"
 	} else if b.board[y][x] == Ice {
 		if team {
 			b.board[y][x] = Water
 			fireScore--
 		}
+		comment = "Ouch! Ice and fire make water!"
 	} else if b.board[y][x] == Tree {
 		if team {
 			b.board[y][x] = TreeHot
 		} else {
 			b.board[y][x] = TreeCold
 		}
+		comment = "The tree's on your side now!"
 	} else if b.board[y][x] == Water {
 		if team {
 			fireScore--
+			comment = "Ouch! Water puts out fire!"
 		} else {
 			iceScore--
+			comment = "Ouch! Water melts ice!"
 		}
 		// b.board[y][x] = Tree
 	}
+	return comment
 }

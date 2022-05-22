@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -109,6 +108,8 @@ type model struct {
 	thisProgram *tea.Program
 	x           int
 	y           int
+
+	comment string
 }
 
 func (m model) Init() tea.Cmd {
@@ -137,10 +138,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.x = (msg.X - 1) / 2 // divide by 2: each emoji is two cells wide
-		m.y = msg.Y - 3       // subtract 2: the top two rows are not part of the board
+		m.y = msg.Y - 3       // subtract 2: the top two rows are not part of the board and the border isn't either
 		//fmt.Println("mouse", m.x, m.y)
 
-		b.Click(m.x, m.y, m.team)
+		m.comment = b.Click(m.x, m.y, m.team)
 		for _, p := range programs {
 			//fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
 			if p == m.thisProgram {
@@ -162,5 +163,7 @@ func (m model) View() string {
 	} else {
 		t = "🧊"
 	}
-	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" + "Press 'q' to quit\n" + b.RenderBoard(t, fireScore, iceScore, "hi") + "\n🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
+	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" +
+		"Press 'q' to quit\n" +
+		b.RenderBoard(t, fireScore, iceScore, "hi") + "\n"
 }
