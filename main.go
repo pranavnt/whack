@@ -82,6 +82,8 @@ func main() {
 
 //var currID int
 
+var currTeam = true
+
 // You can write your own custom bubbletea middleware that wraps tea.Program.
 // Make sure you set the program input and output to ssh.Session.
 func myCustomBubbleteaMiddleware() wish.Middleware {
@@ -96,13 +98,14 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 		//jah := make([]*tea.Program, 0, len(programsTillNow))
 		//copy(jah, programsTillNow)
 		m := &model{
-			team: rand.Float64() > 0.5,
+			team: currTeam,
 			//others: jah,
 			//modelID: currID,
 			//term:   pty.Term,Ω
 			//width:  pty.Window.Width,
 			//height: pty.Window.Height,
 		}
+		currTeam = !currTeam
 
 		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(), tea.WithMouseAllMotion())
 
