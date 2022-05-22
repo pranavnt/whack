@@ -34,7 +34,7 @@ func NewBoard() *Board {
 		board: board,
 	}
 
-	b.Seed()
+	b.Generate()
 
 	return b
 }
@@ -50,24 +50,24 @@ func (b *Board) RenderBoard() string {
 	return s
 }
 
-func (b *Board) Seed() {
+func (b *Board) Generate() {
 	b.whackX = rand.Intn(width)
 	b.whackY = rand.Intn(height)
-	for i := range b.board {
-		for j := range b.board[i] {
-			if i == b.whackY && j == b.whackX {
-				b.board[i][j] = Whack
-			} else {
-				r := rand.Intn(20)
-				// 5% chance of fire, 5% chance of ice
-				if r == 0 {
-					b.board[i][j] = Fire
-				} else if r == 1 {
-					b.board[i][j] = Ice
-				} else {
-					b.board[i][j] = Empty
-				}
-			}
+	b.board[b.whackY][b.whackX] = Whack
+}
+
+func (b *Board) Click(x, y int, team bool) {
+
+	if x > width || y > height {
+		return
+	}
+
+	if b.board[y][x] == Whack {
+		if team {
+			b.board[y][x] = Fire
+		} else {
+			b.board[y][x] = Ice
 		}
+		b.Generate()
 	}
 }
