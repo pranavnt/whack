@@ -165,5 +165,5 @@ func (m model) View() string {
 	}
 	return "You're in the " + t + " team! Click on targets to win " + t + "s for your team!\n" +
 		"Press 'q' to quit\n" +
-		b.RenderBoard(t, fireScore, iceScore, "hi") + "\n"
+		b.RenderBoard(t, fireScore, iceScore, m.comment) + "\n"
 }
