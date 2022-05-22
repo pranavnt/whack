@@ -52,24 +52,30 @@ func NewBoard() *Board {
 	return b
 }
 
-func intTo3DigStr(i int) string {
-	if i <= -10 {
-		return strconv.Itoa(i)
-	} else if i < 0 {
-		return strconv.Itoa(i) + "─"
-	} else if i < 10 {
-		return strconv.Itoa(i) + "──"
-	} else if i < 100 {
-		return strconv.Itoa(i) + "─"
-	} else {
-		return strconv.Itoa(i)
-	}
-}
+//func intTo3DigStr(i int) string {
+//	if i <= -10 {
+//		return strconv.Itoa(i)
+//	} else if i < 0 {
+//		return strconv.Itoa(i) + "─"
+//	} else if i < 10 {
+//		return strconv.Itoa(i) + "──"
+//	} else if i < 100 {
+//		return strconv.Itoa(i) + "─"
+//	} else {
+//		return strconv.Itoa(i)
+//	}
+//}
 
 func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) string {
 	var s string
 
-	s += "╭" + strings.Repeat("─", 4) + t + t + t + strings.Repeat("─", (width-13)*2) + "🔥 " + intTo3DigStr(fireScore) + "──" + "🧊 " + intTo3DigStr(iceScore) + "──" + "╮" + "\n"
+	//scoreStr := "🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
+
+	border := "─"
+	fireStr := "🔥 " + strconv.Itoa(fireScore)
+	iceStr := "🧊 " + strconv.Itoa(iceScore)
+	s += "╭" + fireStr + strings.Repeat(border, 2*(width/2-2)-len([]rune(fireStr))) + t + t + t + strings.Repeat(border, 2*(width/2-2)-len([]rune(iceStr))) + iceStr + "╮\n"
+	//s += "╭" + strings.Repeat("─", 4) + t + t + t + strings.Repeat("─", (width-13)*2) + "🔥 " + intTo3DigStr(fireScore) + "──" + "🧊 " + intTo3DigStr(iceScore) + "──" + "╮" + "\n"
 
 	for _, row := range b.board {
 		s += "│"
@@ -79,7 +85,7 @@ func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) s
 		s += "│\n"
 	}
 
-	s += "╰" + strings.Repeat("─", width*2) + "╯" + "\n"
+	s += "╰" + strings.Repeat(border, 2*width) + "╯" + "\n"
 
 	s += comment
 
