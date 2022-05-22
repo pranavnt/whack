@@ -13,7 +13,7 @@ const (
 	Fire   CellType = "🔥"
 	Ice    CellType = "🧊"
 	Whack  CellType = "🎯"
-	Steam  CellType = "️💧"
+	Water  CellType = "️💧"
 	width  int      = 32
 	height int      = 15
 )
@@ -81,11 +81,11 @@ func (b *Board) Click(x, y int, team bool) {
 		b.Generate()
 	} else if b.board[y][x] == Fire {
 		if !team {
-			b.board[y][x] = Steam
+			b.board[y][x] = Water
 		}
 	} else if b.board[y][x] == Ice {
 		if team {
-			b.board[y][x] = Steam
+			b.board[y][x] = Water 
 		}
 	} else if b.board[y][x] == Tree {
 		if team {
@@ -93,7 +93,7 @@ func (b *Board) Click(x, y int, team bool) {
 		} else {
 			b.board[y][x] = TreeCold
 		}
-	} else if b.board[y][x] == Steam {
+	} else if b.board[y][x] == Water {
 		// b.board[y][x] = Tree
 	}
 }
