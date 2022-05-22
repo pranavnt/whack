@@ -13,7 +13,7 @@ const (
 	Fire   CellType = "🔥"
 	Ice    CellType = "🧊"
 	Whack  CellType = "🎯"
-	Steam  CellType = "️☁️"
+	Steam  CellType = "️☁️ "
 	width  int      = 32
 	height int      = 15
 )
