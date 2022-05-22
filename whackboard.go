@@ -72,9 +72,12 @@ func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) s
 	//scoreStr := "🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
 
 	border := "─"
-	fireStr := "🔥 " + strconv.Itoa(fireScore)
-	iceStr := "🧊 " + strconv.Itoa(iceScore)
-	s += "╭" + fireStr + strings.Repeat(border, 2*(width/2-2)-len([]rune(fireStr))) + t + t + t + strings.Repeat(border, 2*(width/2-2)-len([]rune(iceStr))) + iceStr + "╮\n"
+	scoreStr := "🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
+	//fmt.Println(len(scoreStr), len([]rune(scoreStr)))
+	//fireStr := "🔥 " + strconv.Itoa(fireScore)
+	//iceStr := "🧊 " + strconv.Itoa(iceScore)
+	l := len([]rune(scoreStr))
+	s += t + strings.Repeat(border, width-l/2-l%2-2) + scoreStr + strings.Repeat(border, width-l/2-2) + t + "\n"
 	//s += "╭" + strings.Repeat("─", 4) + t + t + t + strings.Repeat("─", (width-13)*2) + "🔥 " + intTo3DigStr(fireScore) + "──" + "🧊 " + intTo3DigStr(iceScore) + "──" + "╮" + "\n"
 
 	for _, row := range b.board {
@@ -85,9 +88,9 @@ func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) s
 		s += "│\n"
 	}
 
-	s += "╰" + strings.Repeat(border, 2*width) + "╯" + "\n"
-
-	s += comment
+	l = len([]rune(comment))
+	s += t + strings.Repeat(border, width-l/2-l%2-1) + comment + strings.Repeat(border, width-l/2-1) + t + "\n"
+	//s += t + strings.Repeat(border, 2*width-2) + t + "\n"
 
 	return s
 }
