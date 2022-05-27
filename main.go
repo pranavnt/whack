@@ -1,8 +1,5 @@
 package main
 
-// An example Bubble Tea server. This will put an ssh session into alt screen
-// and continually print up to date terminal information.
-
 import (
 	"context"
 	"fmt"
@@ -24,7 +21,6 @@ import (
 )
 
 const (
-	host = ""
 	port = 23234
 
 	rules = `Rules:
@@ -46,7 +42,7 @@ var (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	s, err := wish.NewServer(
-		wish.WithAddress(fmt.Sprintf("%s:%d", host, port)),
+		wish.WithAddress(fmt.Sprintf(":%d", port)),
 		wish.WithHostKeyPath(".ssh/term_info_ed25519"),
 		wish.WithMiddleware(
 			myCustomBubbleteaMiddleware(),
@@ -59,7 +55,7 @@ func main() {
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	log.Printf("Starting SSH server on %s:%d", host, port)
+	log.Printf("Starting SSH server on port %d", port)
 	go func() {
 		if err = s.ListenAndServe(); err != nil {
 			log.Fatalln(err)
@@ -77,44 +73,18 @@ func main() {
 
 var programs = make([]*tea.Program, 0, 100)
 
-//var currID int
-
 var currTeam = true
 
-// You can write your own custom bubbletea middleware that wraps tea.Program.
-// Make sure you set the program input and output to ssh.Session.
 func myCustomBubbleteaMiddleware() wish.Middleware {
 	teaHandler := func(s ssh.Session) *tea.Program {
-		//pty, _, active := s.Pty()
-		//if !active {
-		//	fmt.Println("no active terminal, skipping")
-		//	_ = s.Exit(1)
-		//	return nil
-		//}
-		//currID++
-		//jah := make([]*tea.Program, 0, len(programsTillNow))
-		//copy(jah, programsTillNow)
 		m := &model{
 			team: currTeam,
-			//others: jah,
-			//modelID: currID,
-			//term:   pty.Term,Ω
-			//width:  pty.Window.Width,
-			//height: pty.Window.Height,
 		}
 		currTeam = !currTeam
 
 		p := tea.NewProgram(m, tea.WithInput(s), tea.WithOutput(s), tea.WithAltScreen(),
 			tea.WithMouseCellMotion())
-		//	tea.WithMouseAllMotion())
 
-		//for _, mod := range models {
-		//	mod.others = append(mod.others, p)
-		//}
-		//
-		//models = append(models, m)
-		//
-		//programsTillNow = append(programsTillNow, p)
 		m.thisProgram = p
 		programs = append(programs, p)
 		return p
@@ -122,17 +92,11 @@ func myCustomBubbleteaMiddleware() wish.Middleware {
 	return bm.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
 }
 
-// Just a generic tea.Model to demo terminal information of ssh.
 type model struct {
-	//term   string
-	//width  int
-	//height int
-	team bool // true means fire
-	//modelID int
+	team        bool // true means fire
 	thisProgram *tea.Program
-	//others      []*tea.Program
-	x int
-	y int
+	x           int
+	y           int
 
 	comment string
 }
@@ -168,28 +132,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.x = (msg.X - 1) / 2 // divide by 2: each emoji is two cells wide
 		m.y = msg.Y - 3       // subtract 2: the top two rows are not part of the board and the border isn't either
-		//fmt.Println("mouse", m.x, m.y)
 
 		m.comment = b.Click(m.x, m.y, m.team)
 
-		//lock.Lock()
+		lock.Lock()
 
 		for _, p := range programs {
-			fmt.Printf("other: %p this: %p\n", p, m.thisProgram)
-			pstr := fmt.Sprintf("%p", p)
-			// thisProgramStr := fmt.Sprintf("%p", m.thisProgram)
-
-			// fmt.Println(pstr, thisProgramStr)
-
 			if p == m.thisProgram {
 				continue
 			}
-			fmt.Println("rendering " + pstr)
 			p.Send(tea.Msg(true)) // trigger render
-			fmt.Println("rendered " + pstr)
 		}
 
-		//lock.Unlock()
+		lock.Unlock()
 	}
 
 	return m, nil

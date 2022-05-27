@@ -6,30 +6,28 @@ import (
 	"strings"
 )
 
-type CellType string
-
 const (
-	Tree     CellType = "🌳"
-	TreeHot  CellType = "🌴"
-	TreeCold CellType = "🌲"
-	Fire     CellType = "🔥"
-	Ice      CellType = "🧊"
-	Whack    CellType = "🎯"
-	Water    CellType = "️💧"
-	width    int      = 15
-	height   int      = 15
+	Tree     rune = '🌳'
+	TreeHot  rune = '🌴'
+	TreeCold rune = '🌲'
+	Fire     rune = '🔥'
+	Ice      rune = '🧊'
+	Whack    rune = '🎯'
+	Water    rune = '💧'
+	width    int  = 15
+	height   int  = 15
 )
 
 type Board struct {
-	board  [][]CellType
+	board  [][]rune
 	whackX int
 	whackY int
 }
 
 func NewBoard() *Board {
-	board := make([][]CellType, height)
+	board := make([][]rune, height)
 	for i := range board {
-		board[i] = make([]CellType, width)
+		board[i] = make([]rune, width)
 		for j := range board[i] {
 			r := rand.Float64()
 
@@ -52,45 +50,20 @@ func NewBoard() *Board {
 	return b
 }
 
-//func intTo3DigStr(i int) string {
-//	if i <= -10 {
-//		return strconv.Itoa(i)
-//	} else if i < 0 {
-//		return strconv.Itoa(i) + "─"
-//	} else if i < 10 {
-//		return strconv.Itoa(i) + "──"
-//	} else if i < 100 {
-//		return strconv.Itoa(i) + "─"
-//	} else {
-//		return strconv.Itoa(i)
-//	}
-//}
-
 func (b *Board) RenderBoard(t string, fireScore, iceScore int, comment string) string {
-	var s string
-
-	//scoreStr := "🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
-
+	s := ""
 	border := "─"
 	scoreStr := "🔥 " + strconv.Itoa(fireScore) + " 🧊 " + strconv.Itoa(iceScore)
-	//fmt.Println(len(scoreStr), len([]rune(scoreStr)))
-	//fireStr := "🔥 " + strconv.Itoa(fireScore)
-	//iceStr := "🧊 " + strconv.Itoa(iceScore)
+
 	l := len([]rune(scoreStr))
 	s += t + strings.Repeat(border, width-l/2-l%2-2) + scoreStr + strings.Repeat(border, width-l/2-2) + t + "\n"
-	//s += "╭" + strings.Repeat("─", 4) + t + t + t + strings.Repeat("─", (width-13)*2) + "🔥 " + intTo3DigStr(fireScore) + "──" + "🧊 " + intTo3DigStr(iceScore) + "──" + "╮" + "\n"
 
 	for _, row := range b.board {
-		s += "│"
-		for _, cell := range row {
-			s += string(cell)
-		}
-		s += "│\n"
+		s += "│" + string(row) + "│\n"
 	}
 
 	l = len([]rune(comment))
 	s += t + strings.Repeat(border, width-l/2-l%2-1) + comment + strings.Repeat(border, width-l/2-1) + t + "\n"
-	//s += t + strings.Repeat(border, 2*width-2) + t + "\n"
 
 	return s
 }
@@ -126,14 +99,14 @@ func (b *Board) Click(x, y int, team bool) string {
 		if !team {
 			b.board[y][x] = Water
 			iceScore--
+			comment = "Ouch! You made water!"
 		}
-		comment = "Ouch! You made water!"
 	} else if b.board[y][x] == Ice {
 		if team {
 			b.board[y][x] = Water
 			fireScore--
+			comment = "Ouch! You made water!"
 		}
-		comment = "Ouch! You made water!"
 	} else if b.board[y][x] == Tree {
 		if team {
 			b.board[y][x] = TreeHot
@@ -150,11 +123,10 @@ func (b *Board) Click(x, y int, team bool) string {
 			iceScore--
 			comment = "Ouch! Water melts ice!"
 		}
-		// b.board[y][x] = Tree
 	}
 
 out:
-	for r, row := range b.board {
+	for r, row := range b.board { // detect game end
 		for c, cell := range row {
 			if cell == TreeHot || cell == TreeCold || cell == Tree {
 				break out
